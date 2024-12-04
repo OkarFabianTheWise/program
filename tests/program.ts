@@ -13,30 +13,23 @@ describe("twitter_app", () => {
   // Get the program from the workspace
   const program = anchor.workspace.TwitterApp as anchor.Program<TwitterApp>;; // use anchor.Program
 
-  const keybyte = [
-    191, 18, 208, 61, 25, 134, 35, 202, 134, 119, 77, 42, 14, 209, 153, 103,
-    123, 101, 104, 133, 64, 179, 160, 6, 129, 65, 27, 244, 97, 7, 3, 11, 11,
-    29, 79, 133, 48, 106, 105, 227, 193, 200, 140, 49, 66, 63, 18, 41, 37,
-    106, 100, 133, 99, 17, 147, 102, 108, 4, 175, 176, 7, 92, 209, 21,
-  ];
+  // Create a new wallet
+  const wallet = anchor.web3.Keypair.generate();  
 
-  const wallet = anchor.web3.Keypair.fromSecretKey(Uint8Array.from(keybyte))
-  console.log("wallet:", wallet.publicKey.toString())
+  console.log("requesting airdrop for:", wallet.publicKey.toString())
 
   const content = "SUPERTEAM IS AWESOME!"; // Tweet text
 
   it("Can create a profile", async () => {
-    // Create a new wallet
-    // const wallet = anchor.web3.Keypair.generate();
+    await sleep(1000)
+    // Airdrop some SOL to the wallet
+    await provider.connection.requestAirdrop(wallet.publicKey, anchor.web3.LAMPORTS_PER_SOL); 
     
     // Find the PDA for the profile
     const [profilePda, Bump] = PublicKey.findProgramAddressSync(
       [Buffer.from("profile"), wallet.publicKey.toBuffer()],
       program.programId
     );
-
-    // Airdrop some SOL to the wallet
-    // await provider.connection.requestAirdrop(wallet.publicKey, anchor.web3.LAMPORTS_PER_SOL);
 
     // Create profile
     const tx = await program.methods
